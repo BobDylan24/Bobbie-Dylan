@@ -113,55 +113,55 @@ class Admin(commands.Cog):
                 embed.add_field(name = "Moderator Name", value=f"{interaction.user.mention}", inline=False)
                 await interaction.response.send_message(embed = embed)
     
-    @nextcord.slash_command(name = "mute", description="Mutes a member from the server.", guild_ids=[testServerId])
-    async def mute(self, interaction : Interaction, time: TimeConverter=None, member: Optional[Member] = SlashOption(description="Put the username of the user you are trying to mute", required=False), reason: Optional[Member] = SlashOption(description="Put the reason why you are muting the user.", required=True)):
-        role = nextcord.utils.get(interaction.guild.roles, "Muted")
-        if not role:
-            await interaction.response.send_message("No muted rolew as found! Please create one called `Muted`")
-            return
+    #@nextcord.slash_command(name = "mute", description="Mutes a member from the server.", guild_ids=[testServerId])
+    #async def mute(self, interaction : Interaction, time: Optional[str] = SlashOption(description="Put in the time that you want to mute the user.", required=True), member: Optional[Member] = SlashOption(description="Put the username of the user you are trying to mute", required=True), reason: Optional[str] = SlashOption(description="Put the reason why you are muting the user.", required=True)):
+        #role = interaction.guild.get_role(1054423231026708661)
+        #if not role:
+            #await interaction.response.send_message("No muted rolew as found! Please create one called `Muted`")
+            #return
         
-        try:
-            if self.client.muted_users[member.id]:
-                await interaction.response.send_message("This user is already muted.")
-                return
-        except KeyError:
-            pass
+        #try:
+            #if self.client.muted_users[member.id]:
+                #await interaction.response.send_message("This user is already muted.")
+                #return
+        #except KeyError:
+            #pass
 
-        data = {
-            '_id': member.id,
-            'mutedAt': datetime.now(),
-            'muteDuration': time or None,
-            'mutedBy': interaction.user.id,
-            'guildId': interaction.guild.id
-        }
-        await self.client.mutes.upsert(data)
-        self.client.muted_users[member.id] = data
+        #data = {
+            #'_id': member.id,
+            #'mutedAt': datetime.now(),
+            #'muteDuration': time or None,
+            #'mutedBy': interaction.user.id,
+            #'guildId': interaction.guild.id
+        #}
+        #await self.client.mutes.upsert(data)
+        #self.client.muted_users[member.id] = data
 
-        await member.add_roles(role)
+        #await member.add_roles(role)
 
-        if not time:
-            await interaction.response.send_message(f"Muted {member.display_name}")
-        else:
-            minutes, seconds = divmod(time, 60)
-            hours, minutes = divmod(minutes, 60)
-            if int(hours):
-                await interaction.response.send_message(f"Muted {member.display_name} for {hours} hours, {minutes} minutes and {seconds} seconds.")
-            elif int(minutes):
-                await interaction.response.send_message(f"Muted {member.display_name} for {minutes} minutes and {seconds} seconds")
-            elif int(seconds):
-                await interaction.response.send_message(f"Muted {member.display_name} for {seconds} seconds")
-        if time and time < 300:
-            await asyncio.sleep(time)
+        #if not time:
+            #await interaction.response.send_message(f"Muted {member.display_name}")
+        #else:
+            #minutes, seconds = divmod(time, 60)
+            #hours, minutes = divmod(minutes, 60)
+            #if int(hours):
+                #await interaction.response.send_message(f"Muted {member.display_name} for {hours} hours, {minutes} minutes and {seconds} seconds.")
+            #elif int(minutes):
+                #await interaction.response.send_message(f"Muted {member.display_name} for {minutes} minutes and {seconds} seconds")
+            #elif int(seconds):
+                #await interaction.response.send_message(f"Muted {member.display_name} for {seconds} seconds")
+        #if time and time < 300:
+            #await asyncio.sleep(time)
 
-            if role in member.roles:
-                await member.remove_roles(role)
-                await interaction.response.send_message(f"Unmuted `{member.display_name}")
+            #if role in member.roles:
+                #await member.remove_roles(role)
+                #await interaction.response.send_message(f"Unmuted `{member.display_name}")
             
-            await self.client.mutes.delete(member.id)
-            try:
-                self.client.muted_users.pop(member.id)
-            except KeyError:
-                pass
+            #await self.client.mutes.delete(member.id)
+            #try:
+                #self.client.muted_users.pop(member.id)
+            #except KeyError:
+                #pass
     
     @commands.command(name = "kick", description="Kicks a member from the server")
     async def kick_prefix(self, ctx, member : nextcord.Member=None, *, reason=None):
