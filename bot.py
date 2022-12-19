@@ -13,7 +13,7 @@ cwd = str(cwd)
 intents = nextcord.Intents.all()
 intents.members = True
 
-client = commands.client(command_prefix = '!', intents=intents)
+client = commands.Bot(command_prefix = '!', intents=intents)
 
 client.connection_url = config.mongo
 client.DEFAULTPREFIX = "!"
@@ -66,7 +66,7 @@ for filename in os.listdir('./cogs'):
 if __name__ == '__main__':
     for extension in initial_extensions:
         client.load_extension(extension)
-    client.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(client.connection.url))
+    client.mongo = motor.motor_asyncio.AsyncIOMotorClient(str(client.connection_url))
     client.db = client.mongo["database"]
     client.config = Document(client.db, "config")
     client.mutes = Document(client.db, "mutes")
