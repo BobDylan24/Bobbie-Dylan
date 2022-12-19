@@ -72,7 +72,7 @@ class Admin(commands.Cog):
         await member.kick()
 
     @commands.command(name = "ban", description="Bans a member from the server.")
-    async def ban(self, ctx, member: nextcord.Member=None, *, reason=None):
+    async def ban_prefix(self, ctx, member: nextcord.Member=None, *, reason=None):
         embed = nextcord.Embed(title = "Member Banned", description="Successfully banned the member from the server!", color=nextcord.Color.green())
         embed.add_field(name = "Member Name", value=f"{member.mention}", inline=False)
         embed.add_field(name = "Reason", value=f"{reason}")
