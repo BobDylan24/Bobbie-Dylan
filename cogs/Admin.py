@@ -5,14 +5,69 @@ from nextcord import Member
 from nextcord import SlashOption
 from typing import Optional
 from nextcord.ext.commands import has_permissions, MissingPermissions
+from nextcord.ext import tasks
 from datetime import datetime
+import re
+from copy import deepcopy
+import asyncio
+from dateutil.relativedelta import relativedelta
+
+time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
+time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
 
 date = datetime.today()
+
+class TimeConverter(commands.Converter):
+    async def convert(self, ctx, argument):
+        args = argument.lower()
+        matches = re.findall(time_regex, args)
+        time = 0
+        for key, value in matches:
+            try:
+                time += time_dict[value] * float(key)
+            except KeyError:
+                raise commands.BadArgument(f"{value} is an invalid time key h|m|s|d are valid arguments")
+            except ValueError:
+                raise commands.BadArgument(f"{key} is no a number!")
+        return round(time)
 
 class Admin(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        self.mute_task = self.check_current_mutes.start()
+
+    def cog_unload(self):
+        self.mute_task.cancel()
+    
+    @tasks.loop(minutes=5)
+    async def check_current_mutes(self):
+        currentTime = datetime.now()
+        mutes = deepcopy(self.client.muted_users)
+        for key, value in mutes.items():
+            if value['muteDuration'] is None:
+                continue
+            
+            unmuteTime = value['mutedAt'] + relativedelta(seconds=value['muteDuration'])
+            if currentTime >= unmuteTime:
+                guild = self.client.get_guild(value['guildId'])
+                member = guild.get_member(value['_id'])
+
+                role = nextcord.utils.get(guild.roles, name="Muted")
+                if role in member.roles:
+                    await member.remove_roles(role)
+                    print(f"Unmuted: {member.display_name}")
+                
+                await self.client.mutes.delete(member.id)
+                try:
+                    self.client.muted_users.pop(member.id)
+                except KeyError:
+                    pass
+    
+    @check_current_mutes.before_loop
+    async def before_check_current_mutes(self):
+        await self.bot.wait_until_ready()
+
     
     testServerId = 1054368865628459079
     
