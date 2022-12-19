@@ -84,5 +84,20 @@ class Admin(commands.Cog):
         await member.send(embed = embed)
         await member.ban(reason = reason)
 
+    @commands.command(name = "unban", description="Unbans a member from the server.")
+    async def unban_prefix(self, ctx, member : nextcord.Member=None, *, reason=None):
+        banned_users = ctx.guild.bans()
+        member_name, member_discriminator = member.split("#")
+
+        async for ban_entry in banned_users:
+            user = ban_entry.user
+
+            if(user.name, user.discriminator) == (member_name, member_discriminator):
+                await ctx.guild.unban(user)
+                embed = nextcord.Embed(title="Unbanned Member", description="Successfully unbanned the member from the server!", color=nextcord.Color.green())
+                embed.add_field(name="Member Unbanned", value=f"{member}", inline=False)
+                embed.add_field(name = "Moderator Name", value=f"{ctx.user.mention}", inline=False)
+                await ctx.response.send_message(embed = embed)
+
 def setup(client):
     client.add_cog(Admin(client))
