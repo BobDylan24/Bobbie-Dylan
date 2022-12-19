@@ -11,6 +11,7 @@ import re
 from copy import deepcopy
 import asyncio
 from dateutil.relativedelta import relativedelta
+import utils.json_loader
 
 time_regex = re.compile("(?:(\d{1,5})(h|s|m|d))+?")
 time_dict = {"h": 3600, "s": 1, "m": 60, "d": 86400}
@@ -162,6 +163,18 @@ class Admin(commands.Cog):
                 #self.client.muted_users.pop(member.id)
             #except KeyError:
                 #pass
+
+    @nextcord.slash_command(name = "blacklist", description="Blacklists a user from the bot. OWNER ONLY COMMAND", guild_ids=[testServerId])
+    async def blacklist(self, interaction : Interaction, member: Optional[Member] = SlashOption(description="Put the username that you want to blacklist.", required=True)):
+        if interaction.user.id == "866285734808780812":
+            await interaction.response.send_message("You are not the owner of the bot. So you may not run this command.")
+            return
+        
+        self.client.blacklisted_users.append(member.id)
+        data = utils.json_loader.read_json("blacklist")
+        data["blacklistedUsers"].append(member.id)
+        utils.json_loader.write_json(data, "blacklist")
+        await interaction.response.send_message(f"Hey, I have blacklisted {member.name} for you.")
     
     @commands.command(name = "kick", description="Kicks a member from the server")
     async def kick_prefix(self, ctx, member : nextcord.Member=None, *, reason=None):
