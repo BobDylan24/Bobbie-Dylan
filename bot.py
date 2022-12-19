@@ -4,7 +4,11 @@ from nextcord.ext import commands
 import os
 import config
 from utils.mongo import Document
-import motor
+import motor.motor_asyncio
+from pathlib import Path
+
+cwd = Path(__file__).parents[0]
+cwd = str(cwd)
 
 intents = nextcord.Intents.all()
 intents.members = True
